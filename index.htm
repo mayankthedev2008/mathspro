@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Pro | Optimized Edition</title>
+    <style>
+        :root {
+            /* Dark Mode Variables */
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --primary: #38bdf8;
+            --secondary: #818cf8;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="light"] {
+            --bg: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --primary: #0284c7;
+            --secondary: #4f46e5;
+            --text-main: #1e293b;
+            --text-dim: #64748b;
+            --input-bg: #ffffff;
+            --border: rgba(0, 0, 0, 0.1);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; margin: 0; padding: 0; transition: background 0.3s, color 0.3s; }
+
+        body {
+            background-color: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .app-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            width: 100%;
+            max-width: 440px;
+            padding: 45px 30px;
+            border-radius: 32px;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px var(--shadow);
+            text-align: center;
+            position: relative;
+        }
+
+        /* Toggle is hidden by default, shown only in menu */
+        .theme-toggle {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--primary);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 6px -1px var(--shadow);
+        }
+        
+        #menu.active ~ .theme-toggle { display: flex; } /* Show only when menu is active */
+
+        .screen { display: none; animation: fadeIn 0.4s ease-out; }
+        .screen.active { display: block; }
+
+        h1 { font-size: 2.4rem; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; font-weight: 800; }
+        .tagline { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 35px; display: block; }
+
+        label { display: block; text-align: left; margin: 0 0 8px 12px; color: var(--primary); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+        
+        .input-box {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 16px;
+            width: 100%;
+            margin-bottom: 24px;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .stats { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.75rem; color: var(--text-dim); font-weight: 700; }
+        
+        .progress-container {
+            height: 8px;
+            background: rgba(128, 128, 128, 0.1);
+            border-radius: 10px;
+            margin-bottom: 35px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.4s ease;
+        }
+
+        .problem-display { min-height: 150px; display: flex; flex-direction: column; justify-content: center; margin-bottom: 25px; }
+        .math-text { font-size: 3.2rem; font-weight: 800; letter-spacing: -1px; }
+        .pl-text { font-size: 1.2rem; line-height: 1.6; }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+        .btn-primary:hover { transform: translateY(-2px); }
+
+        .btn-ghost { background: transparent; color: var(--text-dim); margin-top: 15px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .shake { animation: shake 0.4s ease; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="app-card" id="game-card">
+        <button id="theme-btn" class="theme-toggle" onclick="toggleTheme()">
+            <span id="theme-icon">☀️</span>
+        </button>
+
+        <div id="menu" class="screen active">
+            <h1>Math Pro</h1>
+            <span class="tagline">The 15-Question Sprint</span>
+            
+            <label>Calculations</label>
+            <select id="op-type" class="input-box">
+                <option value="*">Multiplication</option>
+                <option value="/">Division</option>
+                <option value="pl">Profit & Loss</option>
+                <option value="perc">Percentages</option>
+                <option value="mixed">Mixed Challenge</option>
+            </select>
+
+            <label>Difficulty</label>
+            <select id="diff-level" class="input-box">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+
+            <button class="btn btn-primary" onclick="startQuiz()">Start Sprint</button>
+        </div>
+
+        <div id="quiz" class="screen">
+            <div class="stats">
+                <span id="q-label">QUESTION 01/15</span>
+                <span id="score-label" style="color: var(--primary)">SCORE: 0</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="p-bar"></div>
+            </div>
+
+            <div class="problem-display" id="problem-box"></div>
+            <input type="number" id="ans-input" class="input-box" placeholder="Answer..." autofocus>
+            
+            <button class="btn btn-primary" onclick="checkAnswer()">Submit Result</button>
+            <button class="btn btn-ghost" onclick="exitToMenu()">← Quit Quiz</button>
+        </div>
+
+        <div id="results" class="screen">
+            <h1>Complete!</h1>
+            <span id="final-res" style="font-size: 3.5rem; font-weight: 800; color: var(--primary); display: block; margin: 20px 0;">0/15</span>
+            <p id="feedback-msg" style="margin-bottom: 30px; font-weight: 600;"></p>
+            <button class="btn btn-primary" onclick="exitToMenu()">Back to Menu</button>
+        </div>
+    </div>
+
+    <script>
+        const state = { qNum: 1, score: 0, target: 0, total: 15 };
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            icon.innerText = isDark ? '🌙' : '☀️';
+            localStorage.setItem('math-theme', isDark ? 'light' : 'dark');
+        }
+
+        // Initialize saved theme
+        const saved = localStorage.getItem('math-theme') || 'dark';
+        document.body.setAttribute('data-theme', saved);
+        document.getElementById('theme-icon').innerText = saved === 'dark' ? '☀️' : '🌙';
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            // Explicitly show/hide theme toggle based on screen
+            document.getElementById('theme-btn').style.display = (id === 'menu') ? 'flex' : 'none';
+        }
+
+        function exitToMenu() { showScreen('menu'); }
+
+        function startQuiz() {
+            state.qNum = 1; state.score = 0;
+            updateUI();
+            generate();
+            showScreen('quiz');
+        }
+
+        function updateUI() {
+            document.getElementById('q-label').innerText = `QUESTION ${state.qNum}/15`;
+            document.getElementById('score-label').innerText = `SCORE: ${state.score}`;
+            document.getElementById('p-bar').style.width = `${(state.qNum / state.total) * 100}%`;
+        }
+
+        function generate() {
+            const op = document.getElementById('op-type').value;
+            const diff = document.getElementById('diff-level').value;
+            const box = document.getElementById('problem-box');
+            let mode = op === 'mixed' ? ['*','/','pl','perc'][Math.floor(Math.random()*4)] : op;
+            let range = diff === 'easy' ? 12 : (diff === 'medium' ? 40 : 100);
+
+            if (mode === '*') {
+                let a = Math.floor(Math.random() * range) + 2;
+                let b = Math.floor(Math.random() * 12) + 2;
+                state.target = a * b;
+                box.innerHTML = `<span class="math-text">${a} × ${b}</span>`;
+            } else if (mode === '/') {
+                let ans = Math.floor(Math.random() * 12) + 2;
+                let div = Math.floor(Math.random() * (range/2)) + 2;
+                state.target = ans;
+                box.innerHTML = `<span class="math-text">${ans * div} ÷ ${div}</span>`;
+            } else if (mode === 'perc') {
+                const percs = [10, 20, 25, 50, 75, 90];
+                let p = percs[Math.floor(Math.random() * percs.length)];
+                let base = (Math.floor(Math.random() * 10) + 1) * 20;
+                state.target = (p * base) / 100;
+                box.innerHTML = `<span class="math-text" style="font-size: 2.5rem;">${p}% of ${base}</span>`;
+            } else {
+                let cp = (Math.floor(Math.random() * range) + 5) * 10;
+                let diffVal = (Math.floor(Math.random() * 15) + 1) * 5;
+                let isProfit = Math.random() > 0.5;
+                state.target = diffVal;
+                box.innerHTML = `<div class="pl-text">Cost: <b>$${cp}</b><br>Sold: <b>$${isProfit ? cp + diffVal : cp - diffVal}</b><br>What is the ${isProfit ? 'Profit' : 'Loss'}?</div>`;
+            }
+            document.getElementById('ans-input').value = '';
+            document.getElementById('ans-input').focus();
+        }
+
+        function checkAnswer() {
+            const val = parseInt(document.getElementById('ans-input').value);
+            if (isNaN(val)) return;
+
+            if (val === state.target) {
+                state.score++;
+            } else {
+                document.getElementById('game-card').classList.add('shake');
+                setTimeout(() => document.getElementById('game-card').classList.remove('shake'), 400);
+            }
+
+            if (state.qNum < state.total) {
+                state.qNum++;
+                updateUI();
+                generate();
+            } else {
+                document.getElementById('final-res').innerText = `${state.score}/15`;
+                document.getElementById('feedback-msg').innerText = state.score > 12 ? "Math Master! 🏆" : "Good job, keep practicing!";
+                showScreen('results');
+            }
+        }
+
+        document.getElementById('ans-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAnswer(); });
+    </script>
+</body>
+</html>
