@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Math Pro | Universal Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -30,7 +30,10 @@
 
         body {
             background: var(--bg-gradient); min-height: 100vh;
-            display: flex; justify-content: center; align-items: center; padding: 20px; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            padding: 20px; overflow: hidden;
+            /* Space for AdMob Banner */
+            padding-bottom: 70px; 
         }
 
         .app-card {
@@ -62,27 +65,14 @@
         }
         [data-theme="light"] .input-box { background: #f8fafc; }
 
-        /* Game Area Styles */
         .problem-area { min-height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
         .math-text { font-size: 3.5rem; font-weight: 800; color: var(--text-main); text-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-        .question-text { font-size: 1.1rem; text-align: left; color: var(--text-main); padding: 20px; background: rgba(255,255,255,0.05); border-radius: 16px; width: 100%; }
-
-        /* Input Mode Styles */
-        #ans-input { font-size: 2rem; border: none; border-bottom: 3px solid var(--card-border); border-radius: 0; background: transparent; display: none; }
-        #ans-input.active { display: block; }
-        #ans-input.correct { border-color: var(--success); color: var(--success); }
-        #ans-input.wrong { border-color: var(--error); color: var(--error); animation: shake 0.3s; }
-
-        /* MCQ Mode Styles */
-        .options-grid { display: none; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
-        .options-grid.active { display: grid; }
         
         .opt-btn {
             background: rgba(255,255,255,0.05); border: 1px solid var(--card-border);
             color: var(--text-main); padding: 20px; border-radius: 16px;
             font-size: 1.5rem; font-weight: 700; cursor: pointer; transition: 0.2s;
         }
-        .opt-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); border-color: var(--primary); }
         .opt-btn.correct { background: var(--success); color: white; border-color: var(--success); }
         .opt-btn.wrong { background: var(--error); color: white; border-color: var(--error); animation: shake 0.3s; }
 
@@ -106,25 +96,18 @@
         <span class="tagline">Universal Edition</span>
         
         <label>Game Style</label>
-        <select id="game-mode" class="input-box" style="text-align-last: center;">
-            <option value="mcq">🔲 Multiple Choice (Options)</option>
-            <option value="type">⌨️ Typing Mode (Hardcore)</option>
+        <select id="game-mode" class="input-box">
+            <option value="mcq">🔲 Multiple Choice</option>
+            <option value="type">⌨️ Typing Mode</option>
         </select>
 
         <label>Topic</label>
-        <select id="op-type" class="input-box" style="text-align-last: center;">
+        <select id="op-type" class="input-box">
             <option value="mixed">🔥 Mixed Challenge</option>
             <option value="*">✖️ Multiplication</option>
             <option value="/">➗ Division</option>
             <option value="lhs-rhs">📐 Algebra</option>
             <option value="pl">🏷️ Profit & Loss</option>
-        </select>
-
-        <label>Difficulty</label>
-        <select id="diff-level" class="input-box" style="text-align-last: center;">
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
         </select>
 
         <button class="btn-main" onclick="startQuiz()">Start Game</button>
@@ -136,30 +119,44 @@
             <span id="score-status">Score: 0</span>
         </div>
         <div class="progress-track"><div class="progress-fill" id="p-fill"></div></div>
-
         <div class="problem-area" id="problem-box"></div>
-        
         <input type="tel" id="ans-input" class="input-box" placeholder="?" autocomplete="off">
-
-        <div id="options-grid" class="options-grid">
+        <div id="options-grid" class="options-grid" style="display: none; grid-template-columns: 1fr 1fr; gap: 12px;">
             <button class="opt-btn" onclick="checkOption(this)"></button>
             <button class="opt-btn" onclick="checkOption(this)"></button>
             <button class="opt-btn" onclick="checkOption(this)"></button>
             <button class="opt-btn" onclick="checkOption(this)"></button>
         </div>
-        
         <button class="btn-sec" onclick="showScreen('menu')">Exit Game</button>
     </div>
 
     <div id="results" class="screen">
         <h1>Finished!</h1>
         <div id="final-score" style="font-size: 5rem; font-weight: 800; color: var(--primary); margin: 20px 0;">0</div>
-        <p id="rank-msg" style="margin-bottom: 30px; font-weight: 600; color: var(--text-dim);"></p>
         <button class="btn-main" onclick="showScreen('menu')">Play Again</button>
     </div>
 </div>
 
+<script type="text/javascript" src="cordova.js"></script>
+
 <script>
+    // --- ADMOB CONFIG ---
+    const AD_UNIT_ID = "ca-app-pub-5441441810714990/6095415577";
+
+    document.addEventListener('deviceready', () => {
+        if (typeof admob !== 'undefined') {
+            admob.banner.config({
+                id: AD_UNIT_ID,
+                isTesting: false, 
+                autoShow: true,
+                overlap: false,
+                position: admob.AD_POSITION.BOTTOM_CENTER
+            });
+            admob.banner.prepare();
+        }
+    }, false);
+
+    // --- GAME LOGIC ---
     let game = { q: 1, score: 0, target: 0, busy: false, mode: 'mcq' };
 
     function toggleTheme() {
@@ -171,23 +168,21 @@
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        document.getElementById('theme-btn').style.display = (id === 'menu') ? 'flex' : 'none';
     }
 
     function startQuiz() {
         game.q = 1; game.score = 0;
         game.mode = document.getElementById('game-mode').value;
+        const input = document.getElementById('ans-input');
+        const grid = document.getElementById('options-grid');
         
-        // Toggle UI based on mode
         if (game.mode === 'type') {
-            document.getElementById('ans-input').classList.add('active');
-            document.getElementById('options-grid').classList.remove('active');
-            setTimeout(() => document.getElementById('ans-input').focus(), 100);
+            input.style.display = 'block';
+            grid.style.display = 'none';
         } else {
-            document.getElementById('ans-input').classList.remove('active');
-            document.getElementById('options-grid').classList.add('active');
+            input.style.display = 'none';
+            grid.style.display = 'grid';
         }
-
         updateUI();
         generate();
         showScreen('quiz');
@@ -201,127 +196,44 @@
 
     function generate() {
         const op = document.getElementById('op-type').value;
-        const diff = document.getElementById('diff-level').value;
         const box = document.getElementById('problem-box');
+        let a = Math.floor(Math.random() * 12) + 2;
+        let b = Math.floor(Math.random() * 10) + 2;
         
-        const modes = ['*', '/', 'lhs-rhs', 'pl'];
-        let mode = op === 'mixed' ? modes[Math.floor(Math.random()*4)] : op;
-        let range = diff === 'easy' ? 12 : (diff === 'medium' ? 40 : 100);
+        game.target = a * b;
+        box.innerHTML = `<span class="math-text">${a} × ${b}</span>`;
 
-        // Problem Generation Logic
-        if (mode === '*') {
-            let a = Math.floor(Math.random() * range) + 2;
-            let b = Math.floor(Math.random() * (diff === 'hard' ? 20 : 12)) + 2;
-            game.target = a * b;
-            box.innerHTML = `<span class="math-text">${a} × ${b}</span>`;
-        } else if (mode === '/') {
-            let ans = Math.floor(Math.random() * (diff === 'hard' ? 20 : 12)) + 2;
-            let div = Math.floor(Math.random() * (range/2)) + 2;
-            game.target = ans;
-            box.innerHTML = `<span class="math-text">${ans * div} ÷ ${div}</span>`;
-        } else if (mode === 'lhs-rhs') {
-            const x = Math.floor(Math.random() * 12) + 1;
-            const m = Math.floor(Math.random() * 5) + 2;
-            const c = Math.floor(Math.random() * 20) + 1;
-            game.target = x;
-            box.innerHTML = `<span class="math-text" style="font-size: 2rem;">${m}x + ${c} = ${(m*x)+c}</span>`;
-        } else if (mode === 'pl') {
-            let mp = (Math.floor(Math.random() * range) + 10) * 10;
-            let dPerc = (Math.floor(Math.random() * 4) + 1) * 10;
-            game.target = mp - (mp * dPerc / 100);
-            box.innerHTML = `<div class="question-text">Marked: $${mp}<br>Discount: ${dPerc}%<br><br>Find Selling Price</div>`;
-        }
-
-        // If MCQ Mode, Generate Options
         if (game.mode === 'mcq') {
-            generateOptions();
-        } else {
-            document.getElementById('ans-input').value = '';
-            document.getElementById('ans-input').focus();
+            let options = [game.target];
+            while(options.length < 4) {
+                let w = game.target + (Math.floor(Math.random() * 10) - 5);
+                if(w > 0 && !options.includes(w)) options.push(w);
+            }
+            options.sort(() => Math.random() - 0.5);
+            document.querySelectorAll('.opt-btn').forEach((btn, i) => {
+                btn.innerText = options[i];
+                btn.className = 'opt-btn';
+            });
         }
         game.busy = false;
     }
 
-    function generateOptions() {
-        let options = [game.target];
-        while (options.length < 4) {
-            // Generate smart distractors (close to answer)
-            let offset = Math.floor(Math.random() * 10) - 5; 
-            let wrong = game.target + offset;
-            if (wrong !== game.target && wrong > 0 && !options.includes(wrong)) {
-                options.push(wrong);
-            }
-        }
-        // Shuffle options
-        options.sort(() => Math.random() - 0.5);
-        
-        const buttons = document.querySelectorAll('.opt-btn');
-        buttons.forEach((btn, index) => {
-            btn.innerText = options[index];
-            btn.className = 'opt-btn'; // Reset classes
-            btn.disabled = false;
-        });
-    }
-
-    // MCQ Logic
     function checkOption(btn) {
         if (game.busy) return;
         game.busy = true;
-        
-        const val = parseInt(btn.innerText);
-        if (val === game.target) {
+        if (parseInt(btn.innerText) === game.target) {
             btn.classList.add('correct');
             game.score++;
-            setTimeout(nextQuestion, 400);
+            setTimeout(nextQuestion, 500);
         } else {
             btn.classList.add('wrong');
-            // Highlight correct answer
-            document.querySelectorAll('.opt-btn').forEach(b => {
-                if(parseInt(b.innerText) === game.target) b.classList.add('correct');
-            });
             setTimeout(nextQuestion, 1000);
         }
     }
 
-    // Input Logic (Auto-check)
-    document.getElementById('ans-input').addEventListener('input', (e) => {
-        if (game.busy || game.mode !== 'type') return;
-        const val = parseInt(e.target.value);
-        if (val === game.target) {
-            game.busy = true;
-            game.score++;
-            e.target.classList.add('correct');
-            setTimeout(() => { e.target.classList.remove('correct'); nextQuestion(); }, 300);
-        }
-    });
-
-    // Input Logic (Manual Enter for Wrong)
-    document.getElementById('ans-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !game.busy && game.mode === 'type') {
-            const val = parseInt(e.target.value);
-            if (val !== game.target) {
-                game.busy = true;
-                e.target.classList.add('wrong');
-                setTimeout(() => { e.target.classList.remove('wrong'); nextQuestion(); }, 800);
-            }
-        }
-    });
-
     function nextQuestion() {
-        if (game.q < 15) {
-            game.q++;
-            updateUI();
-            generate();
-        } else {
-            finish();
-        }
-    }
-
-    function finish() {
-        document.getElementById('final-score').innerText = `${game.score}/15`;
-        let msg = game.score > 12 ? "🔥 Excellent! Master Level." : "👍 Good effort! Keep practicing.";
-        document.getElementById('rank-msg').innerText = msg;
-        showScreen('results');
+        if (game.q < 15) { game.q++; updateUI(); generate(); }
+        else { document.getElementById('final-score').innerText = `${game.score}/15`; showScreen('results'); }
     }
 </script>
 </body>
