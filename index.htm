@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Math Pro | Universal Edition</title>
-    
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-5441441810714990" crossorigin="anonymous"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -36,7 +33,8 @@
             background: var(--bg-gradient); min-height: 100vh;
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
             padding: 20px; overflow: hidden; transition: background 0.6s ease;
-            padding-bottom: 90px; /* Space for the banner */
+            /* Space for AdMob Banner */
+            padding-bottom: 70px;
         }
 
         .app-card {
@@ -52,6 +50,7 @@
             background: rgba(255,255,255,0.1); border: 1px solid var(--card-border);
             color: var(--text-main); width: 40px; height: 40px; border-radius: 50%;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s;
         }
 
         .screen { 
@@ -63,6 +62,8 @@
         .screen.active { opacity: 1; pointer-events: auto; transform: scale(1); }
 
         h1 { font-size: 2.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
+        .tagline { color: var(--primary); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 15px; display: block; }
+        
         .high-score-badge {
             background: rgba(251, 191, 36, 0.15); color: var(--gold); border: 1px solid rgba(251, 191, 36, 0.3);
             padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; display: inline-block; margin-bottom: 25px;
@@ -70,54 +71,33 @@
 
         .input-box {
             background: rgba(0, 0, 0, 0.2); border: 2px solid var(--card-border); color: var(--text-main);
-            padding: 16px; border-radius: 16px; width: 100%; margin-bottom: 15px; font-size: 1.2rem; text-align: center;
+            padding: 16px; border-radius: 16px; width: 100%; margin-bottom: 15px; font-size: 1.2rem; text-align: center; font-weight: 600;
         }
 
-        .problem-area { min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .problem-area { min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 10px; }
         .math-text { font-size: 3.5rem; font-weight: 800; color: var(--text-main); line-height: 1.2; }
         
-        #correction-text { font-weight: 700; color: var(--success); margin-top: 10px; min-height: 24px; opacity: 0; }
+        /* Correction Feedback Text */
+        #correction-text { font-weight: 700; color: var(--success); margin-top: 10px; min-height: 24px; opacity: 0; transition: 0.3s; }
 
         .opt-btn {
             background: rgba(255,255,255,0.05); border: 1px solid var(--card-border);
             color: var(--text-main); padding: 20px; border-radius: 16px;
-            font-size: 1.5rem; font-weight: 700; cursor: pointer;
+            font-size: 1.5rem; font-weight: 700; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        .opt-btn.correct-glow { background: var(--success); color: white; }
-        .opt-btn.wrong-shake { background: var(--error); color: white; animation: shake 0.4s both; }
+        .opt-btn.correct-glow { background: var(--success); color: white; border-color: var(--success); transform: scale(1.05); }
+        .opt-btn.wrong-shake { background: var(--error); color: white; border-color: var(--error); animation: shake 0.4s both; }
 
-        .btn-main { background: var(--primary); color: white; width: 100%; padding: 18px; border-radius: 16px; border: none; font-weight: 700; font-size: 1.1rem; cursor: pointer; }
-        .btn-sec { background: transparent; color: var(--text-dim); width: 100%; padding: 12px; border: none; cursor: pointer; }
+        .btn-main { background: var(--primary); color: white; width: 100%; padding: 18px; border-radius: 16px; border: none; font-weight: 700; cursor: pointer; margin-top: 10px; font-size: 1.1rem; }
+        .btn-sec { background: transparent; color: var(--text-dim); width: 100%; padding: 12px; border: none; font-weight: 600; cursor: pointer; margin-top: 5px; }
 
         .status-bar { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--text-dim); font-size: 0.85rem; font-weight: 700; }
         .progress-track { height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s; }
 
-        /* BANNER AREA STYLING */
-        #ad-wrapper {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            background: rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .ad-label {
-            font-size: 8px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 2px;
-        }
-
         @keyframes shake { 
-            10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 
+            10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 
         }
     </style>
 </head>
@@ -157,7 +137,7 @@
         </div>
         
         <div id="typing-ui" style="display: none; width: 100%;">
-            <input type="number" id="ans-input" class="input-box" placeholder="Answer...">
+            <input type="number" pattern="[0-9]*" id="ans-input" class="input-box" placeholder="Answer...">
             <button class="btn-main" onclick="checkTyping()">Submit</button>
         </div>
 
@@ -177,18 +157,26 @@
     </div>
 </div>
 
-<div id="ad-wrapper">
-    <div class="ad-label">Advertisement</div>
-    <ins class="adsbygoogle"
-         style="display:inline-block;width:320px;height:50px"
-         data-ad-client="ca-app-pub-5441441810714990"
-         data-ad-slot="6095415577"></ins>
-    <script>
-         (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-</div>
+<script type="text/javascript" src="cordova.js"></script>
 
 <script>
+    // --- ADMOB CONFIG (New Ad Unit ID) ---
+    const AD_UNIT_ID = "ca-app-pub-5441441810714990/6518750114";
+
+    document.addEventListener('deviceready', () => {
+        if (typeof admob !== 'undefined') {
+            admob.banner.config({
+                id: AD_UNIT_ID,
+                isTesting: false, 
+                autoShow: true,
+                overlap: false,
+                position: admob.AD_POSITION.BOTTOM_CENTER
+            });
+            admob.banner.prepare();
+        }
+    }, false);
+
+    // --- GAME LOGIC ---
     let game = { q: 1, score: 0, target: 0, busy: false, mode: 'mcq' };
     let highScore = localStorage.getItem('mathProHighScore') || 0;
     document.getElementById('menu-high-score').innerText = `Best Score: ${highScore}`;
@@ -259,16 +247,21 @@
             game.score++;
             setTimeout(nextQuestion, 600);
         } else {
+            // AUTO-CORRECTION LOGIC
             if (game.mode === 'mcq') {
                 if(element) element.classList.add('wrong-shake');
+                // Highlight the real answer
                 document.querySelectorAll('.opt-btn').forEach(btn => {
                     if(parseInt(btn.innerText) === game.target) btn.classList.add('correct-glow');
                 });
             } else {
                 const cText = document.getElementById('correction-text');
-                cText.innerText = `Answer: ${game.target}`;
+                cText.innerText = `Correct Answer: ${game.target}`;
                 cText.style.opacity = "1";
+                document.getElementById('typing-ui').style.animation = "shake 0.4s";
+                setTimeout(() => document.getElementById('typing-ui').style.animation = "", 400);
             }
+            // Longer delay so they can learn the answer
             setTimeout(nextQuestion, 1800);
         }
     }
